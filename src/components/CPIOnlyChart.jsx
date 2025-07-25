@@ -15,7 +15,6 @@ const CPIOnlyChart = ({ startDate, endDate }) => {
     records.find((r) => r.날짜 === date)?.예측값 ?? null
   );
 
-  // 크래시 방지
   if (actual.every(v => v === null) && predicted.every(v => v === null)) {
     return (
       <div style={{ padding: 16, textAlign: "center", color: "#6b7280" }}>
@@ -24,19 +23,49 @@ const CPIOnlyChart = ({ startDate, endDate }) => {
     );
   }
 
-  const actualColor = "#3b82f6";     // 파란색
-  const predictedColor = "#ef4444"; // 빨간색
+  const combined = [...actual, ...predicted].filter(v => typeof v === "number");
+  const minVal = Math.min(...combined);
+  const maxVal = Math.max(...combined);
+
+  let computedInterval = (maxVal - minVal) / 5;
+  computedInterval = Math.ceil(computedInterval * 10) / 10; // 소수점 반올림
+  const interval = Math.max(1, computedInterval);
+
+  const adjustedMin = Math.floor(minVal / interval) * interval;
+  const adjustedMax = Math.ceil(maxVal / interval) * interval;
+
+  const actualColor = "#2563eb";
+  const predictedColor = "#ef4444";
 
   const option = {
-    tooltip: { trigger: "axis" },
-    legend: { top: 10, left: "center" },
-    grid: { left: 40, right: 20, top: 80, bottom: 60 },
+    animation: false, // ✅ 이동 애니메이션 제거
+    tooltip: {
+      trigger: "axis",
+      backgroundColor: "#fff",
+      borderColor: "#d1d5db",
+      borderWidth: 1,
+      textStyle: { color: "#111827" }
+    },
+    legend: {
+      top: 10,
+      left: "center",
+      textStyle: { fontWeight: "bold" }
+    },
+    grid: { left: 50, right: 30, top: 60, bottom: 90 },
     xAxis: {
       type: "category",
       data: allDates,
-      axisLabel: { rotate: 45 },
+      axisLabel: { rotate: 45, fontSize: 11 },
+      axisLine: { lineStyle: { color: "#9ca3af" } }
     },
-    yAxis: { type: "value" },
+    yAxis: {
+      type: "value",
+      min: adjustedMin,
+      max: adjustedMax,
+      interval: interval,
+      axisLabel: { formatter: "{value}", fontSize: 11 },
+      axisLine: { lineStyle: { color: "#9ca3af" } }
+    },
     series: [
       {
         name: "CPI (실제)",
@@ -45,26 +74,25 @@ const CPIOnlyChart = ({ startDate, endDate }) => {
         smooth: true,
         symbol: "circle",
         symbolSize: 6,
-        lineStyle: { width: 2 },
-        itemStyle: { color: actualColor },
+        lineStyle: { width: 3, color: actualColor },
+        itemStyle: { color: actualColor }
       },
       {
         name: "CPI (예측)",
         type: "line",
         data: predicted,
         smooth: true,
-        symbol: "none",
+        symbol: "circle",
+        symbolSize: 6,
         lineStyle: {
           type: "dashed",
           width: 2,
-          color: predictedColor,
+          color: predictedColor
         },
-        itemStyle: {
-          color: predictedColor, // <-- 이게 범례 색 결정
-          
-        },
-      },
-    ],
+        itemStyle: { color: predictedColor }
+        // ✅ markPoint 제거
+      }
+    ]
   };
 
   return (
@@ -79,7 +107,7 @@ const CPIOnlyChart = ({ startDate, endDate }) => {
         marginBottom: "2.5px",
         minHeight: "400px",
         display: "flex",
-        flexDirection: "column",
+        flexDirection: "column"
       }}
     >
       <h3
@@ -88,7 +116,7 @@ const CPIOnlyChart = ({ startDate, endDate }) => {
           fontWeight: "600",
           marginBottom: "16px",
           color: "#111827",
-          textAlign: "center",
+          textAlign: "center"
         }}
       >
         CPI 추세 차트
@@ -97,7 +125,7 @@ const CPIOnlyChart = ({ startDate, endDate }) => {
       <ReactECharts
         option={option}
         notMerge={true}
-        style={{ width: "100%", height: 280 }}
+        style={{ width: "100%", height: 350 }}
       />
     </div>
   );

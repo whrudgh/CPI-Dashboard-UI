@@ -1,5 +1,5 @@
-// DateRangePicker.jsx
-const DateRangePicker = ({ startDate, endDate, onChange }) => {
+// components/cpi/DateRangePicker.jsx
+const DateRangePicker = ({ startDate, endDate, onChange, minDate, maxDate }) => {
   return (
     <div
       style={{
@@ -30,6 +30,8 @@ const DateRangePicker = ({ startDate, endDate, onChange }) => {
           <input
             type="date"
             value={startDate}
+            min={minDate}
+            max={maxDate}
             onChange={(e) =>
               onChange({ startDate: e.target.value, endDate })
             }
@@ -48,6 +50,8 @@ const DateRangePicker = ({ startDate, endDate, onChange }) => {
           <input
             type="date"
             value={endDate}
+            min={minDate}
+            max={maxDate}
             onChange={(e) =>
               onChange({ startDate, endDate: e.target.value })
             }
